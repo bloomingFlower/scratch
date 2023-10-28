@@ -35,9 +35,9 @@ func main() {
 		log.Fatal("Can't connect to database:", err)
 	}
 
-	queries :=database.New(conn)
+	queries := database.New(conn)
 	apiCfg := apiConfig{
-		DB: database.New(conn)
+		DB: queries,
 	}
 
 	router := chi.NewRouter()
@@ -54,6 +54,7 @@ func main() {
 	v1Router := chi.NewRouter()
 	v1Router.Get("/healthz", handlerReadiness)
 	v1Router.Get("/err", handlerErr)
+	v1Router.Post("/users", apiCfg.handlerCreateUser)
 
 	router.Mount("/v1", v1Router)
 
@@ -63,8 +64,5 @@ func main() {
 	}
 
 	log.Printf("Server starting on port %v", portString)
-	err := srv.ListenAndServe()
-	if err != nil {
-		log.Fatal(err)
-	}
+	log.Fatal(srv.ListenAndServe())
 }
