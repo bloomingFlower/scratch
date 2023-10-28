@@ -1,0 +1,2 @@
+# scratch
+go sample project
