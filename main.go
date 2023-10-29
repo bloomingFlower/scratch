@@ -2,10 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/bloomingFlower/rssagg/internal/database"
 	"github.com/go-chi/chi/v5"
@@ -19,7 +19,6 @@ type apiConfig struct {
 }
 
 func main() {
-	fmt.Println("vim-go")
 	godotenv.Load(".env")
 	portString := os.Getenv("PORT")
 	if portString == "" {
@@ -35,10 +34,12 @@ func main() {
 		log.Fatal("Can't connect to database:", err)
 	}
 
-	queries := database.New(conn)
+	db := database.New(conn)
 	apiCfg := apiConfig{
-		DB: queries,
+		DB: db,
 	}
+
+	go startScraping(db, 10, time.Minute)
 
 	router := chi.NewRouter()
 
@@ -64,6 +65,8 @@ func main() {
 	v1Router.Post("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerCreateFeedFollow))
 	v1Router.Get("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerGetFeedFollows))
 	v1Router.Delete("/feed_follows/{feedFollowID}", apiCfg.middlewareAuth(apiCfg.handlerDeleteFeedFollows))
+
+	v1Router.Get("/posts", apiCfg.middlewareAuth(apiCfg.handlerGetPostsForUser))
 
 	router.Mount("/v1", v1Router)
 
