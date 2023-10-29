@@ -12,7 +12,7 @@ import (
 
 func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Name string `json:name`
+		Name string `json:"name"`
 	}
 	decoder := json.NewDecoder(r.Body)
 
@@ -33,6 +33,10 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't create user: %v", err))
 		return
 	}
+	// 201
+	respondWithJSON(w, http.StatusCreated, databaseUserToUser(user))
+}
 
+func (apiCfg *apiConfig) handlerGetUser(w http.ResponseWriter, r *http.Request, user database.User) {
 	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }
