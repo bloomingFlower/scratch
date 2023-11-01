@@ -68,6 +68,9 @@ func main() {
 
 	v1Router.Get("/posts", apiCfg.middlewareAuth(apiCfg.handlerGetPostsForUser))
 
+	//v1Router.Get("/view", apiCfg.middlewareAuth(apiCfg.handlerView))
+	v1Router.Get("/view", apiCfg.handlerView)
+
 	router.Mount("/v1", v1Router)
 
 	srv := &http.Server{
