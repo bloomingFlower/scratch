@@ -1,0 +1,131 @@
+syntax = "proto3";
+// protoc --go_out=./protos --go_opt=paths=source_relative --go-grpc_out=./protos --go-grpc_opt=paths=source_relative api.proto
+package api;
+option go_package = "github.com/bloomingFlower/rssagg/api";
+
+service ApiService {
+  rpc Healthz(HealthzRequest) returns (HealthzResponse) {}
+  rpc Err(ErrRequest) returns (ErrResponse) {}
+  rpc CreateUser(CreateUserRequest) returns (User) {}
+  rpc GetUser(GetUserRequest) returns (User) {}
+  rpc CreateFeed(CreateFeedRequest) returns (Feed) {}
+  rpc GetFeeds(GetFeedsRequest) returns (stream Feed) {}
+  rpc CreateFeedFollow(CreateFeedFollowRequest) returns (FeedFollow) {}
+  rpc GetFeedFollows(GetFeedFollowsRequest) returns (stream FeedFollow) {}
+  rpc DeleteFeedFollows(DeleteFeedFollowsRequest) returns (FeedFollow) {}
+  rpc GetPostsForUser(GetPostsForUserRequest) returns (stream Post) {}
+  rpc View(ViewRequest) returns (ViewResponse) {}
+}
+
+// Request and Response messages go here
+message HealthzResponse {
+  string Status = 1;
+  string Message = 2;
+}
+
+message HealthzRequest {
+  string componentName = 1;
+}
+
+message ErrRequest {
+  string errorMessage = 1;
+}
+
+message ErrResponse {
+  string resultMessage = 1;
+}
+
+message User {
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string name = 4;
+}
+
+message CreateUserRequest {
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string name = 4;
+}
+
+message GetUserRequest {
+  string apiKey = 1;
+}
+
+message Feed {
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string name = 4;
+  string url = 5;
+  string userId = 6;
+  string lastFetchedAt = 7;
+}
+
+message CreateFeedRequest {
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string name = 4;
+  string url = 5;
+  string userId = 6;
+}
+
+message GetFeedsRequest {
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string name = 4;
+  string url = 5;
+  string userId = 6;
+  string lastFetchedAt = 7;
+}
+
+message CreateFeedFollowRequest {
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string userId = 4;
+  string feedId = 5;
+}
+
+message GetFeedFollowsRequest {
+  string userId = 1;
+}
+
+message DeleteFeedFollowsRequest {
+  string id = 1;
+  string userId = 2;
+}
+
+message FeedFollow {
+  string id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  string userId = 4;
+  string feedId = 5;
+}
+
+message GetPostsForUserRequest {
+  string userId = 1;
+  string limit = 2;
+}
+
+message Post {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string feedId = 4;
+}
+
+message ViewRequest {
+  string userId = 1;
+}
+
+message ViewResponse {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  // Add more fields as needed
+}

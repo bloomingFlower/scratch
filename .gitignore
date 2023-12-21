@@ -1,2 +1,5 @@
 rssagg
 .env
+.idea
+
+./vendor/

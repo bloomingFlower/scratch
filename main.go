@@ -1,18 +1,35 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/bloomingFlower/rssagg/internal/database"
+	api "github.com/bloomingFlower/rssagg/protos"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"google.golang.org/grpc"
 )
+
+type server struct {
+	api.UnimplementedApiServiceServer
+}
+
+func (s *server) Healthz(ctx context.Context, req *api.HealthzRequest) (*api.HealthzResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Healthz not implemented")
+}
+func (s *server) Err(ctx context.Context, req *api.ErrRequest) (*api.ErrResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Err not implemented")
+}
 
 type apiConfig struct {
 	DB *database.Queries
@@ -40,7 +57,18 @@ func main() {
 	}
 
 	go startScraping(db, 10, time.Minute)
+	//
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	api.RegisterApiServiceServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 
+	//
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
