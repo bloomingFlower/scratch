@@ -1,49 +1,68 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
+	"context"
+	api "github.com/bloomingFlower/rssagg/protos"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"time"
 
 	"github.com/bloomingFlower/rssagg/internal/database"
 	"github.com/google/uuid"
 )
 
-func (apiCfg *apiConfig) handlerCreateFeed(w http.ResponseWriter, r *http.Request, user database.User) {
-	type parameters struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	}
-	decoder := json.NewDecoder(r.Body)
-
-	params := parameters{}
-	err := decoder.Decode(&params)
+func (s *server) CreateFeed(ctx context.Context, req *api.CreateFeedRequest) (*api.Feed, error) {
+	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Error parsing JSON: %v", err))
-		return
+		return nil, status.Errorf(codes.InvalidArgument, "Invalid user ID: %v", err)
 	}
 
-	feed, err := apiCfg.DB.CreateFeed(r.Context(), database.CreateFeedParams{
+	feed, err := s.DB.CreateFeed(ctx, database.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
-		Name:      params.Name,
-		Url:       params.URL,
-		UserID:    user.ID,
+		Name:      req.Name,
+		Url:       req.Url,
+		UserID:    userID,
 	})
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Couldn't create feed: %v", err))
-		return
+		return nil, status.Errorf(codes.Internal, "Couldn't create feed: %v", err)
 	}
-	respondWithJSON(w, http.StatusCreated, databaseFeedToFeed(feed))
-}
-func (apiCfg *apiConfig) handlerGetFeeds(w http.ResponseWriter, r *http.Request) {
-	feeds, err := apiCfg.DB.GetFeeds(r.Context())
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn't get feeds: %v", err))
-		return
-	}
-	respondWithJSON(w, http.StatusCreated, databaseFeedsToFeeds(feeds))
 
+	lastFetchedAt := ""
+	if feed.LastFetchedAt.Valid {
+		lastFetchedAt = feed.LastFetchedAt.Time.Format(time.RFC3339)
+	}
+
+	return &api.Feed{
+		Id:            feed.ID.String(),
+		CreatedAt:     feed.CreatedAt.String(),
+		UpdatedAt:     feed.UpdatedAt.String(),
+		Name:          feed.Name,
+		Url:           feed.Url,
+		UserId:        feed.UserID.String(),
+		LastFetchedAt: lastFetchedAt,
+	}, nil
+}
+
+func (s *server) GetFeeds(req *api.GetFeedsRequest, stream api.ApiService_GetFeedsServer) error {
+	feeds, err := s.DB.GetFeeds(context.Background())
+	if err != nil {
+		return status.Errorf(codes.Internal, "Couldn't get feeds: %v", err)
+	}
+	for _, feed := range feeds {
+		err := stream.Send(&api.Feed{
+			Id:            feed.ID.String(),
+			CreatedAt:     feed.CreatedAt.String(),
+			UpdatedAt:     feed.UpdatedAt.String(),
+			Name:          feed.Name,
+			Url:           feed.Url,
+			UserId:        feed.UserID.String(),
+			LastFetchedAt: feed.LastFetchedAt.Time.Format(time.RFC3339),
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

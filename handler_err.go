@@ -1,7 +1,12 @@
 package main
 
-import "net/http"
+import (
+	"context"
+	api "github.com/bloomingFlower/rssagg/protos"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
 
-func handlerErr(w http.ResponseWriter, r *http.Request) {
-	respondWithError(w, 400, "Something went wrong")
+func (s *server) Err(ctx context.Context, req *api.ErrRequest) (*api.ErrResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Err not implemented")
 }
