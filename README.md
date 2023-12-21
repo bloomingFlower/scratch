@@ -1,2 +1,2 @@
-# scratch
-go sample project
+# scrapper
+go grpc project
