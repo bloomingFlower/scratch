@@ -12,6 +12,11 @@ import (
 	"github.com/google/uuid"
 )
 
+func (s *server) runScraping(ctx context.Context, req *RunScrapingRequest) (*RunScrapingResponse, error) {
+	go startScraping(s.db, int(req.Concurrency), 0)
+	return &RunScrapingResponse{}, nil
+}
+
 func startScraping(
 	db *database.Queries,
 	concurrency int,
@@ -36,6 +41,10 @@ func startScraping(
 			go scrapeFeed(db, wg, feed)
 		}
 		wg.Wait()
+
+		if timeBetweenRequest == 0 {
+			break
+		}
 	}
 }
 
