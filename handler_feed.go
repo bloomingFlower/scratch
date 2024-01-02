@@ -5,13 +5,14 @@ import (
 	api "github.com/bloomingFlower/rssagg/protos"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 
 	"github.com/bloomingFlower/rssagg/internal/database"
 	"github.com/google/uuid"
 )
 
-func (s *server) CreateFeed(ctx context.Context, req *api.CreateFeedRequest) (*api.Feed, error) {
+func (s *server) HandlerCreateFeed(ctx context.Context, req *api.CreateFeedRequest) (*api.Feed, error) {
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid user ID: %v", err)
@@ -36,8 +37,8 @@ func (s *server) CreateFeed(ctx context.Context, req *api.CreateFeedRequest) (*a
 
 	return &api.Feed{
 		Id:            feed.ID.String(),
-		CreatedAt:     feed.CreatedAt.String(),
-		UpdatedAt:     feed.UpdatedAt.String(),
+		CreatedAt:     timestamppb.New(feed.CreatedAt),
+		UpdatedAt:     timestamppb.New(feed.UpdatedAt),
 		Name:          feed.Name,
 		Url:           feed.Url,
 		UserId:        feed.UserID.String(),
@@ -45,7 +46,7 @@ func (s *server) CreateFeed(ctx context.Context, req *api.CreateFeedRequest) (*a
 	}, nil
 }
 
-func (s *server) GetFeeds(req *api.GetFeedsRequest, stream api.ApiService_GetFeedsServer) error {
+func (s *server) HandlerGetFeeds(req *api.GetFeedsRequest, stream api.ApiService_HandlerGetFeedsServer) error {
 	feeds, err := s.DB.GetFeeds(context.Background())
 	if err != nil {
 		return status.Errorf(codes.Internal, "Couldn't get feeds: %v", err)
@@ -53,8 +54,8 @@ func (s *server) GetFeeds(req *api.GetFeedsRequest, stream api.ApiService_GetFee
 	for _, feed := range feeds {
 		err := stream.Send(&api.Feed{
 			Id:            feed.ID.String(),
-			CreatedAt:     feed.CreatedAt.String(),
-			UpdatedAt:     feed.UpdatedAt.String(),
+			CreatedAt:     timestamppb.New(feed.CreatedAt),
+			UpdatedAt:     timestamppb.New(feed.UpdatedAt),
 			Name:          feed.Name,
 			Url:           feed.Url,
 			UserId:        feed.UserID.String(),

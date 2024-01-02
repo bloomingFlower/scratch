@@ -1,10 +1,12 @@
 package main
 
 import (
+	api "github.com/bloomingFlower/rssagg/protos"
 	"time"
 
 	"github.com/bloomingFlower/rssagg/internal/database"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type User struct {
@@ -43,13 +45,15 @@ type Post struct {
 	FeedID      uuid.UUID `json:"feed_id"`
 }
 
-func databaseUserToUser(dbUser database.User) User {
-	return User{
-		ID:        dbUser.ID,
-		CreatedAt: dbUser.CreatedAt,
-		UpdatedAt: dbUser.UpdatedAt,
+func databaseUserToUser(dbUser database.User) *api.User {
+	createdAt := timestamppb.New(dbUser.CreatedAt)
+	updatedAt := timestamppb.New(dbUser.UpdatedAt)
+	return &api.User{
+		Id:        dbUser.ID.String(),
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 		Name:      dbUser.Name,
-		APIKey:    dbUser.ApiKey,
+		ApiKey:    dbUser.ApiKey,
 	}
 }
 
@@ -90,26 +94,29 @@ func databaseFeedFollowsToFeedFollows(feedFollows []database.FeedFollow) []FeedF
 	return result
 }
 
-func databasePostToPost(dbPost database.Post) Post {
+func databasePostToPost(dbPost database.Post) *api.Post {
 	var description *string
 	if dbPost.Description.Valid {
 		description = &dbPost.Description.String
 	}
+	createdAt := timestamppb.New(dbPost.CreatedAt)
+	updatedAt := timestamppb.New(dbPost.UpdatedAt)
+	publishedAt := timestamppb.New(dbPost.PublishedAt)
 
-	return Post{
-		ID:          dbPost.ID,
-		CreatedAt:   dbPost.CreatedAt,
-		UpdatedAt:   dbPost.UpdatedAt,
+	return &api.Post{
+		Id:          dbPost.ID.String(),
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 		Title:       dbPost.Title,
-		Description: description,
-		PublishedAt: dbPost.PublishedAt,
+		Description: *description,
+		PublishedAt: publishedAt,
 		Url:         dbPost.Url,
-		FeedID:      dbPost.FeedID,
+		FeedId:      dbPost.FeedID.String(),
 	}
 }
 
-func databasePostsToPosts(dbPosts []database.Post) []Post {
-	posts := []Post{}
+func databasePostsToPosts(dbPosts []database.Post) []*api.Post {
+	posts := []*api.Post{}
 	for _, dbPost := range dbPosts {
 		posts = append(posts, databasePostToPost(dbPost))
 	}

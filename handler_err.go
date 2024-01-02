@@ -1,12 +1,17 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	api "github.com/bloomingFlower/rssagg/protos"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"log"
 )
 
-func (s *server) Err(ctx context.Context, req *api.ErrRequest) (*api.ErrResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Err not implemented")
+func (s *server) handlerErr(req *api.ErrRequest) (*api.ErrResponse, error) {
+	log.Printf("Received error request: %v", req.ErrorMessage)
+
+	res := &api.ErrResponse{
+		ResultMessage: fmt.Sprintf("Received error request: %v", req.ErrorMessage),
+	}
+
+	return res, nil
 }

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 	"log"
 	"net"
@@ -62,6 +63,7 @@ func main() {
 		DB:                            db,
 	}
 	grpcServer := grpc.NewServer()
+	reflection.Register(grpcServer)
 	api.RegisterApiServiceServer(grpcServer, s)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

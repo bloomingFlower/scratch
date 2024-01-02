@@ -12,9 +12,17 @@ import (
 	"github.com/google/uuid"
 )
 
+type RunScrapingRequest struct {
+	Concurrency int32
+}
+
+type RunScrapingResponse struct {
+	Status string
+}
+
 func (s *server) runScraping(ctx context.Context, req *RunScrapingRequest) (*RunScrapingResponse, error) {
-	go startScraping(s.db, int(req.Concurrency), 0)
-	return &RunScrapingResponse{}, nil
+	go startScraping(s.DB, int(req.Concurrency), 0)
+	return &RunScrapingResponse{Status: "Scraping started"}, nil
 }
 
 func startScraping(

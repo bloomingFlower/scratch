@@ -1,20 +1,23 @@
 syntax = "proto3";
 // protoc --go_out=./protos --go_opt=paths=source_relative --go-grpc_out=./protos --go-grpc_opt=paths=source_relative api.proto
+import "google/protobuf/timestamp.proto";
+
 package api;
 option go_package = "github.com/bloomingFlower/rssagg/api";
 
 service ApiService {
-  rpc Healthz(HealthzRequest) returns (HealthzResponse) {}
-  rpc Err(ErrRequest) returns (ErrResponse) {}
-  rpc CreateUser(CreateUserRequest) returns (User) {}
-  rpc GetUser(GetUserRequest) returns (User) {}
-  rpc CreateFeed(CreateFeedRequest) returns (Feed) {}
-  rpc GetFeeds(GetFeedsRequest) returns (stream Feed) {}
-  rpc CreateFeedFollow(CreateFeedFollowRequest) returns (FeedFollow) {}
-  rpc GetFeedFollows(GetFeedFollowsRequest) returns (stream FeedFollow) {}
-  rpc DeleteFeedFollows(DeleteFeedFollowsRequest) returns (FeedFollow) {}
-  rpc GetPostsForUser(GetPostsForUserRequest) returns (stream Post) {}
-  rpc View(ViewRequest) returns (ViewResponse) {}
+  rpc handlerHealthz(HealthzRequest) returns (HealthzResponse) {}
+  rpc handlerErr(ErrRequest) returns (ErrResponse) {}
+  rpc CheckReadiness(ReadinessRequest) returns (ReadinessResponse) {}
+  rpc handlerCreateUser(CreateUserRequest) returns (User) {}
+  rpc handlerGetUser(GetUserRequest) returns (User) {}
+  rpc handlerCreateFeed(CreateFeedRequest) returns (Feed) {}
+  rpc handlerGetFeeds(GetFeedsRequest) returns (stream Feed) {}
+  rpc handlerCreateFeedFollow(CreateFeedFollowRequest) returns (FeedFollow) {}
+  rpc handlerGetFeedFollows(GetFeedFollowsRequest) returns (stream FeedFollow) {}
+  rpc handlerDeleteFeedFollows(DeleteFeedFollowsRequest) returns (FeedFollow) {}
+  rpc handlerGetPostsForUser(GetPostsForUserRequest) returns (stream Post) {}
+  rpc handlerView(ViewRequest) returns (ViewResponse) {}
 }
 
 // Request and Response messages go here
@@ -37,15 +40,16 @@ message ErrResponse {
 
 message User {
   string id = 1;
-  string createdAt = 2;
-  string updatedAt = 3;
+  google.protobuf.Timestamp createdAt = 2;
+  google.protobuf.Timestamp updatedAt = 3;
   string name = 4;
+  string apiKey = 5;
 }
 
 message CreateUserRequest {
   string id = 1;
-  string createdAt = 2;
-  string updatedAt = 3;
+  google.protobuf.Timestamp createdAt = 2;
+  google.protobuf.Timestamp updatedAt = 3;
   string name = 4;
 }
 
@@ -55,8 +59,8 @@ message GetUserRequest {
 
 message Feed {
   string id = 1;
-  string createdAt = 2;
-  string updatedAt = 3;
+  google.protobuf.Timestamp createdAt = 2;
+  google.protobuf.Timestamp updatedAt = 3;
   string name = 4;
   string url = 5;
   string userId = 6;
@@ -65,8 +69,8 @@ message Feed {
 
 message CreateFeedRequest {
   string id = 1;
-  string createdAt = 2;
-  string updatedAt = 3;
+  google.protobuf.Timestamp createdAt = 2;
+  google.protobuf.Timestamp updatedAt = 3;
   string name = 4;
   string url = 5;
   string userId = 6;
@@ -74,8 +78,8 @@ message CreateFeedRequest {
 
 message GetFeedsRequest {
   string id = 1;
-  string createdAt = 2;
-  string updatedAt = 3;
+  google.protobuf.Timestamp createdAt = 2;
+  google.protobuf.Timestamp updatedAt = 3;
   string name = 4;
   string url = 5;
   string userId = 6;
@@ -84,8 +88,8 @@ message GetFeedsRequest {
 
 message CreateFeedFollowRequest {
   string id = 1;
-  string createdAt = 2;
-  string updatedAt = 3;
+  google.protobuf.Timestamp createdAt = 2;
+  google.protobuf.Timestamp updatedAt = 3;
   string userId = 4;
   string feedId = 5;
 }
@@ -101,8 +105,8 @@ message DeleteFeedFollowsRequest {
 
 message FeedFollow {
   string id = 1;
-  string createdAt = 2;
-  string updatedAt = 3;
+  google.protobuf.Timestamp createdAt = 2;
+  google.protobuf.Timestamp updatedAt = 3;
   string userId = 4;
   string feedId = 5;
 }
@@ -114,18 +118,25 @@ message GetPostsForUserRequest {
 
 message Post {
   string id = 1;
-  string title = 2;
-  string content = 3;
-  string feedId = 4;
+  google.protobuf.Timestamp createdAt = 2;
+  google.protobuf.Timestamp updatedAt = 3;
+  string title = 4;
+  string description = 5;
+  google.protobuf.Timestamp publishedAt = 6;
+  string url = 7;
+  string feedId = 8;
 }
 
 message ViewRequest {
-  string userId = 1;
 }
 
 message ViewResponse {
-  string id = 1;
-  string name = 2;
-  string email = 3;
-  // Add more fields as needed
+  string html = 1;
+}
+
+message ReadinessRequest {
+}
+
+message ReadinessResponse {
+  bool isReady = 1;
 }

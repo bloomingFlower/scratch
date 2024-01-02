@@ -22,17 +22,18 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ApiServiceClient interface {
-	Healthz(ctx context.Context, in *HealthzRequest, opts ...grpc.CallOption) (*HealthzResponse, error)
-	Err(ctx context.Context, in *ErrRequest, opts ...grpc.CallOption) (*ErrResponse, error)
-	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
-	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
-	CreateFeed(ctx context.Context, in *CreateFeedRequest, opts ...grpc.CallOption) (*Feed, error)
-	GetFeeds(ctx context.Context, in *GetFeedsRequest, opts ...grpc.CallOption) (ApiService_GetFeedsClient, error)
-	CreateFeedFollow(ctx context.Context, in *CreateFeedFollowRequest, opts ...grpc.CallOption) (*FeedFollow, error)
-	GetFeedFollows(ctx context.Context, in *GetFeedFollowsRequest, opts ...grpc.CallOption) (ApiService_GetFeedFollowsClient, error)
-	DeleteFeedFollows(ctx context.Context, in *DeleteFeedFollowsRequest, opts ...grpc.CallOption) (*FeedFollow, error)
-	GetPostsForUser(ctx context.Context, in *GetPostsForUserRequest, opts ...grpc.CallOption) (ApiService_GetPostsForUserClient, error)
-	View(ctx context.Context, in *ViewRequest, opts ...grpc.CallOption) (*ViewResponse, error)
+	HandlerHealthz(ctx context.Context, in *HealthzRequest, opts ...grpc.CallOption) (*HealthzResponse, error)
+	HandlerErr(ctx context.Context, in *ErrRequest, opts ...grpc.CallOption) (*ErrResponse, error)
+	CheckReadiness(ctx context.Context, in *ReadinessRequest, opts ...grpc.CallOption) (*ReadinessResponse, error)
+	HandlerCreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
+	HandlerGetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
+	HandlerCreateFeed(ctx context.Context, in *CreateFeedRequest, opts ...grpc.CallOption) (*Feed, error)
+	HandlerGetFeeds(ctx context.Context, in *GetFeedsRequest, opts ...grpc.CallOption) (ApiService_HandlerGetFeedsClient, error)
+	HandlerCreateFeedFollow(ctx context.Context, in *CreateFeedFollowRequest, opts ...grpc.CallOption) (*FeedFollow, error)
+	HandlerGetFeedFollows(ctx context.Context, in *GetFeedFollowsRequest, opts ...grpc.CallOption) (ApiService_HandlerGetFeedFollowsClient, error)
+	HandlerDeleteFeedFollows(ctx context.Context, in *DeleteFeedFollowsRequest, opts ...grpc.CallOption) (*FeedFollow, error)
+	HandlerGetPostsForUser(ctx context.Context, in *GetPostsForUserRequest, opts ...grpc.CallOption) (ApiService_HandlerGetPostsForUserClient, error)
+	HandlerView(ctx context.Context, in *ViewRequest, opts ...grpc.CallOption) (*ViewResponse, error)
 }
 
 type apiServiceClient struct {
@@ -43,57 +44,66 @@ func NewApiServiceClient(cc grpc.ClientConnInterface) ApiServiceClient {
 	return &apiServiceClient{cc}
 }
 
-func (c *apiServiceClient) Healthz(ctx context.Context, in *HealthzRequest, opts ...grpc.CallOption) (*HealthzResponse, error) {
+func (c *apiServiceClient) HandlerHealthz(ctx context.Context, in *HealthzRequest, opts ...grpc.CallOption) (*HealthzResponse, error) {
 	out := new(HealthzResponse)
-	err := c.cc.Invoke(ctx, "/api.ApiService/Healthz", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.ApiService/handlerHealthz", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiServiceClient) Err(ctx context.Context, in *ErrRequest, opts ...grpc.CallOption) (*ErrResponse, error) {
+func (c *apiServiceClient) HandlerErr(ctx context.Context, in *ErrRequest, opts ...grpc.CallOption) (*ErrResponse, error) {
 	out := new(ErrResponse)
-	err := c.cc.Invoke(ctx, "/api.ApiService/Err", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.ApiService/handlerErr", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error) {
+func (c *apiServiceClient) CheckReadiness(ctx context.Context, in *ReadinessRequest, opts ...grpc.CallOption) (*ReadinessResponse, error) {
+	out := new(ReadinessResponse)
+	err := c.cc.Invoke(ctx, "/api.ApiService/CheckReadiness", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiServiceClient) HandlerCreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/api.ApiService/CreateUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.ApiService/handlerCreateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error) {
+func (c *apiServiceClient) HandlerGetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/api.ApiService/GetUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.ApiService/handlerGetUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiServiceClient) CreateFeed(ctx context.Context, in *CreateFeedRequest, opts ...grpc.CallOption) (*Feed, error) {
+func (c *apiServiceClient) HandlerCreateFeed(ctx context.Context, in *CreateFeedRequest, opts ...grpc.CallOption) (*Feed, error) {
 	out := new(Feed)
-	err := c.cc.Invoke(ctx, "/api.ApiService/CreateFeed", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.ApiService/handlerCreateFeed", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiServiceClient) GetFeeds(ctx context.Context, in *GetFeedsRequest, opts ...grpc.CallOption) (ApiService_GetFeedsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ApiService_ServiceDesc.Streams[0], "/api.ApiService/GetFeeds", opts...)
+func (c *apiServiceClient) HandlerGetFeeds(ctx context.Context, in *GetFeedsRequest, opts ...grpc.CallOption) (ApiService_HandlerGetFeedsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ApiService_ServiceDesc.Streams[0], "/api.ApiService/handlerGetFeeds", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &apiServiceGetFeedsClient{stream}
+	x := &apiServiceHandlerGetFeedsClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -103,16 +113,16 @@ func (c *apiServiceClient) GetFeeds(ctx context.Context, in *GetFeedsRequest, op
 	return x, nil
 }
 
-type ApiService_GetFeedsClient interface {
+type ApiService_HandlerGetFeedsClient interface {
 	Recv() (*Feed, error)
 	grpc.ClientStream
 }
 
-type apiServiceGetFeedsClient struct {
+type apiServiceHandlerGetFeedsClient struct {
 	grpc.ClientStream
 }
 
-func (x *apiServiceGetFeedsClient) Recv() (*Feed, error) {
+func (x *apiServiceHandlerGetFeedsClient) Recv() (*Feed, error) {
 	m := new(Feed)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -120,21 +130,21 @@ func (x *apiServiceGetFeedsClient) Recv() (*Feed, error) {
 	return m, nil
 }
 
-func (c *apiServiceClient) CreateFeedFollow(ctx context.Context, in *CreateFeedFollowRequest, opts ...grpc.CallOption) (*FeedFollow, error) {
+func (c *apiServiceClient) HandlerCreateFeedFollow(ctx context.Context, in *CreateFeedFollowRequest, opts ...grpc.CallOption) (*FeedFollow, error) {
 	out := new(FeedFollow)
-	err := c.cc.Invoke(ctx, "/api.ApiService/CreateFeedFollow", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.ApiService/handlerCreateFeedFollow", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiServiceClient) GetFeedFollows(ctx context.Context, in *GetFeedFollowsRequest, opts ...grpc.CallOption) (ApiService_GetFeedFollowsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ApiService_ServiceDesc.Streams[1], "/api.ApiService/GetFeedFollows", opts...)
+func (c *apiServiceClient) HandlerGetFeedFollows(ctx context.Context, in *GetFeedFollowsRequest, opts ...grpc.CallOption) (ApiService_HandlerGetFeedFollowsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ApiService_ServiceDesc.Streams[1], "/api.ApiService/handlerGetFeedFollows", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &apiServiceGetFeedFollowsClient{stream}
+	x := &apiServiceHandlerGetFeedFollowsClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -144,16 +154,16 @@ func (c *apiServiceClient) GetFeedFollows(ctx context.Context, in *GetFeedFollow
 	return x, nil
 }
 
-type ApiService_GetFeedFollowsClient interface {
+type ApiService_HandlerGetFeedFollowsClient interface {
 	Recv() (*FeedFollow, error)
 	grpc.ClientStream
 }
 
-type apiServiceGetFeedFollowsClient struct {
+type apiServiceHandlerGetFeedFollowsClient struct {
 	grpc.ClientStream
 }
 
-func (x *apiServiceGetFeedFollowsClient) Recv() (*FeedFollow, error) {
+func (x *apiServiceHandlerGetFeedFollowsClient) Recv() (*FeedFollow, error) {
 	m := new(FeedFollow)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -161,21 +171,21 @@ func (x *apiServiceGetFeedFollowsClient) Recv() (*FeedFollow, error) {
 	return m, nil
 }
 
-func (c *apiServiceClient) DeleteFeedFollows(ctx context.Context, in *DeleteFeedFollowsRequest, opts ...grpc.CallOption) (*FeedFollow, error) {
+func (c *apiServiceClient) HandlerDeleteFeedFollows(ctx context.Context, in *DeleteFeedFollowsRequest, opts ...grpc.CallOption) (*FeedFollow, error) {
 	out := new(FeedFollow)
-	err := c.cc.Invoke(ctx, "/api.ApiService/DeleteFeedFollows", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.ApiService/handlerDeleteFeedFollows", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *apiServiceClient) GetPostsForUser(ctx context.Context, in *GetPostsForUserRequest, opts ...grpc.CallOption) (ApiService_GetPostsForUserClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ApiService_ServiceDesc.Streams[2], "/api.ApiService/GetPostsForUser", opts...)
+func (c *apiServiceClient) HandlerGetPostsForUser(ctx context.Context, in *GetPostsForUserRequest, opts ...grpc.CallOption) (ApiService_HandlerGetPostsForUserClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ApiService_ServiceDesc.Streams[2], "/api.ApiService/handlerGetPostsForUser", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &apiServiceGetPostsForUserClient{stream}
+	x := &apiServiceHandlerGetPostsForUserClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -185,16 +195,16 @@ func (c *apiServiceClient) GetPostsForUser(ctx context.Context, in *GetPostsForU
 	return x, nil
 }
 
-type ApiService_GetPostsForUserClient interface {
+type ApiService_HandlerGetPostsForUserClient interface {
 	Recv() (*Post, error)
 	grpc.ClientStream
 }
 
-type apiServiceGetPostsForUserClient struct {
+type apiServiceHandlerGetPostsForUserClient struct {
 	grpc.ClientStream
 }
 
-func (x *apiServiceGetPostsForUserClient) Recv() (*Post, error) {
+func (x *apiServiceHandlerGetPostsForUserClient) Recv() (*Post, error) {
 	m := new(Post)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -202,9 +212,9 @@ func (x *apiServiceGetPostsForUserClient) Recv() (*Post, error) {
 	return m, nil
 }
 
-func (c *apiServiceClient) View(ctx context.Context, in *ViewRequest, opts ...grpc.CallOption) (*ViewResponse, error) {
+func (c *apiServiceClient) HandlerView(ctx context.Context, in *ViewRequest, opts ...grpc.CallOption) (*ViewResponse, error) {
 	out := new(ViewResponse)
-	err := c.cc.Invoke(ctx, "/api.ApiService/View", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.ApiService/handlerView", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -215,17 +225,18 @@ func (c *apiServiceClient) View(ctx context.Context, in *ViewRequest, opts ...gr
 // All implementations must embed UnimplementedApiServiceServer
 // for forward compatibility
 type ApiServiceServer interface {
-	Healthz(context.Context, *HealthzRequest) (*HealthzResponse, error)
-	Err(context.Context, *ErrRequest) (*ErrResponse, error)
-	CreateUser(context.Context, *CreateUserRequest) (*User, error)
-	GetUser(context.Context, *GetUserRequest) (*User, error)
-	CreateFeed(context.Context, *CreateFeedRequest) (*Feed, error)
-	GetFeeds(*GetFeedsRequest, ApiService_GetFeedsServer) error
-	CreateFeedFollow(context.Context, *CreateFeedFollowRequest) (*FeedFollow, error)
-	GetFeedFollows(*GetFeedFollowsRequest, ApiService_GetFeedFollowsServer) error
-	DeleteFeedFollows(context.Context, *DeleteFeedFollowsRequest) (*FeedFollow, error)
-	GetPostsForUser(*GetPostsForUserRequest, ApiService_GetPostsForUserServer) error
-	View(context.Context, *ViewRequest) (*ViewResponse, error)
+	HandlerHealthz(context.Context, *HealthzRequest) (*HealthzResponse, error)
+	HandlerErr(context.Context, *ErrRequest) (*ErrResponse, error)
+	CheckReadiness(context.Context, *ReadinessRequest) (*ReadinessResponse, error)
+	HandlerCreateUser(context.Context, *CreateUserRequest) (*User, error)
+	HandlerGetUser(context.Context, *GetUserRequest) (*User, error)
+	HandlerCreateFeed(context.Context, *CreateFeedRequest) (*Feed, error)
+	HandlerGetFeeds(*GetFeedsRequest, ApiService_HandlerGetFeedsServer) error
+	HandlerCreateFeedFollow(context.Context, *CreateFeedFollowRequest) (*FeedFollow, error)
+	HandlerGetFeedFollows(*GetFeedFollowsRequest, ApiService_HandlerGetFeedFollowsServer) error
+	HandlerDeleteFeedFollows(context.Context, *DeleteFeedFollowsRequest) (*FeedFollow, error)
+	HandlerGetPostsForUser(*GetPostsForUserRequest, ApiService_HandlerGetPostsForUserServer) error
+	HandlerView(context.Context, *ViewRequest) (*ViewResponse, error)
 	mustEmbedUnimplementedApiServiceServer()
 }
 
@@ -233,38 +244,41 @@ type ApiServiceServer interface {
 type UnimplementedApiServiceServer struct {
 }
 
-func (UnimplementedApiServiceServer) Healthz(context.Context, *HealthzRequest) (*HealthzResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Healthz not implemented")
+func (UnimplementedApiServiceServer) HandlerHealthz(context.Context, *HealthzRequest) (*HealthzResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandlerHealthz not implemented")
 }
-func (UnimplementedApiServiceServer) Err(context.Context, *ErrRequest) (*ErrResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Err not implemented")
+func (UnimplementedApiServiceServer) HandlerErr(context.Context, *ErrRequest) (*ErrResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandlerErr not implemented")
 }
-func (UnimplementedApiServiceServer) CreateUser(context.Context, *CreateUserRequest) (*User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+func (UnimplementedApiServiceServer) CheckReadiness(context.Context, *ReadinessRequest) (*ReadinessResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckReadiness not implemented")
 }
-func (UnimplementedApiServiceServer) GetUser(context.Context, *GetUserRequest) (*User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+func (UnimplementedApiServiceServer) HandlerCreateUser(context.Context, *CreateUserRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandlerCreateUser not implemented")
 }
-func (UnimplementedApiServiceServer) CreateFeed(context.Context, *CreateFeedRequest) (*Feed, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateFeed not implemented")
+func (UnimplementedApiServiceServer) HandlerGetUser(context.Context, *GetUserRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandlerGetUser not implemented")
 }
-func (UnimplementedApiServiceServer) GetFeeds(*GetFeedsRequest, ApiService_GetFeedsServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetFeeds not implemented")
+func (UnimplementedApiServiceServer) HandlerCreateFeed(context.Context, *CreateFeedRequest) (*Feed, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandlerCreateFeed not implemented")
 }
-func (UnimplementedApiServiceServer) CreateFeedFollow(context.Context, *CreateFeedFollowRequest) (*FeedFollow, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateFeedFollow not implemented")
+func (UnimplementedApiServiceServer) HandlerGetFeeds(*GetFeedsRequest, ApiService_HandlerGetFeedsServer) error {
+	return status.Errorf(codes.Unimplemented, "method HandlerGetFeeds not implemented")
 }
-func (UnimplementedApiServiceServer) GetFeedFollows(*GetFeedFollowsRequest, ApiService_GetFeedFollowsServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetFeedFollows not implemented")
+func (UnimplementedApiServiceServer) HandlerCreateFeedFollow(context.Context, *CreateFeedFollowRequest) (*FeedFollow, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandlerCreateFeedFollow not implemented")
 }
-func (UnimplementedApiServiceServer) DeleteFeedFollows(context.Context, *DeleteFeedFollowsRequest) (*FeedFollow, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteFeedFollows not implemented")
+func (UnimplementedApiServiceServer) HandlerGetFeedFollows(*GetFeedFollowsRequest, ApiService_HandlerGetFeedFollowsServer) error {
+	return status.Errorf(codes.Unimplemented, "method HandlerGetFeedFollows not implemented")
 }
-func (UnimplementedApiServiceServer) GetPostsForUser(*GetPostsForUserRequest, ApiService_GetPostsForUserServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetPostsForUser not implemented")
+func (UnimplementedApiServiceServer) HandlerDeleteFeedFollows(context.Context, *DeleteFeedFollowsRequest) (*FeedFollow, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandlerDeleteFeedFollows not implemented")
 }
-func (UnimplementedApiServiceServer) View(context.Context, *ViewRequest) (*ViewResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method View not implemented")
+func (UnimplementedApiServiceServer) HandlerGetPostsForUser(*GetPostsForUserRequest, ApiService_HandlerGetPostsForUserServer) error {
+	return status.Errorf(codes.Unimplemented, "method HandlerGetPostsForUser not implemented")
+}
+func (UnimplementedApiServiceServer) HandlerView(context.Context, *ViewRequest) (*ViewResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandlerView not implemented")
 }
 func (UnimplementedApiServiceServer) mustEmbedUnimplementedApiServiceServer() {}
 
@@ -279,209 +293,227 @@ func RegisterApiServiceServer(s grpc.ServiceRegistrar, srv ApiServiceServer) {
 	s.RegisterService(&ApiService_ServiceDesc, srv)
 }
 
-func _ApiService_Healthz_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ApiService_HandlerHealthz_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HealthzRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServiceServer).Healthz(ctx, in)
+		return srv.(ApiServiceServer).HandlerHealthz(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.ApiService/Healthz",
+		FullMethod: "/api.ApiService/handlerHealthz",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).Healthz(ctx, req.(*HealthzRequest))
+		return srv.(ApiServiceServer).HandlerHealthz(ctx, req.(*HealthzRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApiService_Err_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ApiService_HandlerErr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ErrRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServiceServer).Err(ctx, in)
+		return srv.(ApiServiceServer).HandlerErr(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.ApiService/Err",
+		FullMethod: "/api.ApiService/handlerErr",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).Err(ctx, req.(*ErrRequest))
+		return srv.(ApiServiceServer).HandlerErr(ctx, req.(*ErrRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApiService_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ApiService_CheckReadiness_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadinessRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiServiceServer).CheckReadiness(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.ApiService/CheckReadiness",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiServiceServer).CheckReadiness(ctx, req.(*ReadinessRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ApiService_HandlerCreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServiceServer).CreateUser(ctx, in)
+		return srv.(ApiServiceServer).HandlerCreateUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.ApiService/CreateUser",
+		FullMethod: "/api.ApiService/handlerCreateUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).CreateUser(ctx, req.(*CreateUserRequest))
+		return srv.(ApiServiceServer).HandlerCreateUser(ctx, req.(*CreateUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApiService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ApiService_HandlerGetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServiceServer).GetUser(ctx, in)
+		return srv.(ApiServiceServer).HandlerGetUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.ApiService/GetUser",
+		FullMethod: "/api.ApiService/handlerGetUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).GetUser(ctx, req.(*GetUserRequest))
+		return srv.(ApiServiceServer).HandlerGetUser(ctx, req.(*GetUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApiService_CreateFeed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ApiService_HandlerCreateFeed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateFeedRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServiceServer).CreateFeed(ctx, in)
+		return srv.(ApiServiceServer).HandlerCreateFeed(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.ApiService/CreateFeed",
+		FullMethod: "/api.ApiService/handlerCreateFeed",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).CreateFeed(ctx, req.(*CreateFeedRequest))
+		return srv.(ApiServiceServer).HandlerCreateFeed(ctx, req.(*CreateFeedRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApiService_GetFeeds_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _ApiService_HandlerGetFeeds_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(GetFeedsRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ApiServiceServer).GetFeeds(m, &apiServiceGetFeedsServer{stream})
+	return srv.(ApiServiceServer).HandlerGetFeeds(m, &apiServiceHandlerGetFeedsServer{stream})
 }
 
-type ApiService_GetFeedsServer interface {
+type ApiService_HandlerGetFeedsServer interface {
 	Send(*Feed) error
 	grpc.ServerStream
 }
 
-type apiServiceGetFeedsServer struct {
+type apiServiceHandlerGetFeedsServer struct {
 	grpc.ServerStream
 }
 
-func (x *apiServiceGetFeedsServer) Send(m *Feed) error {
+func (x *apiServiceHandlerGetFeedsServer) Send(m *Feed) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _ApiService_CreateFeedFollow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ApiService_HandlerCreateFeedFollow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateFeedFollowRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServiceServer).CreateFeedFollow(ctx, in)
+		return srv.(ApiServiceServer).HandlerCreateFeedFollow(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.ApiService/CreateFeedFollow",
+		FullMethod: "/api.ApiService/handlerCreateFeedFollow",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).CreateFeedFollow(ctx, req.(*CreateFeedFollowRequest))
+		return srv.(ApiServiceServer).HandlerCreateFeedFollow(ctx, req.(*CreateFeedFollowRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApiService_GetFeedFollows_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _ApiService_HandlerGetFeedFollows_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(GetFeedFollowsRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ApiServiceServer).GetFeedFollows(m, &apiServiceGetFeedFollowsServer{stream})
+	return srv.(ApiServiceServer).HandlerGetFeedFollows(m, &apiServiceHandlerGetFeedFollowsServer{stream})
 }
 
-type ApiService_GetFeedFollowsServer interface {
+type ApiService_HandlerGetFeedFollowsServer interface {
 	Send(*FeedFollow) error
 	grpc.ServerStream
 }
 
-type apiServiceGetFeedFollowsServer struct {
+type apiServiceHandlerGetFeedFollowsServer struct {
 	grpc.ServerStream
 }
 
-func (x *apiServiceGetFeedFollowsServer) Send(m *FeedFollow) error {
+func (x *apiServiceHandlerGetFeedFollowsServer) Send(m *FeedFollow) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _ApiService_DeleteFeedFollows_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ApiService_HandlerDeleteFeedFollows_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteFeedFollowsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServiceServer).DeleteFeedFollows(ctx, in)
+		return srv.(ApiServiceServer).HandlerDeleteFeedFollows(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.ApiService/DeleteFeedFollows",
+		FullMethod: "/api.ApiService/handlerDeleteFeedFollows",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).DeleteFeedFollows(ctx, req.(*DeleteFeedFollowsRequest))
+		return srv.(ApiServiceServer).HandlerDeleteFeedFollows(ctx, req.(*DeleteFeedFollowsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApiService_GetPostsForUser_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _ApiService_HandlerGetPostsForUser_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(GetPostsForUserRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ApiServiceServer).GetPostsForUser(m, &apiServiceGetPostsForUserServer{stream})
+	return srv.(ApiServiceServer).HandlerGetPostsForUser(m, &apiServiceHandlerGetPostsForUserServer{stream})
 }
 
-type ApiService_GetPostsForUserServer interface {
+type ApiService_HandlerGetPostsForUserServer interface {
 	Send(*Post) error
 	grpc.ServerStream
 }
 
-type apiServiceGetPostsForUserServer struct {
+type apiServiceHandlerGetPostsForUserServer struct {
 	grpc.ServerStream
 }
 
-func (x *apiServiceGetPostsForUserServer) Send(m *Post) error {
+func (x *apiServiceHandlerGetPostsForUserServer) Send(m *Post) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _ApiService_View_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ApiService_HandlerView_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ViewRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServiceServer).View(ctx, in)
+		return srv.(ApiServiceServer).HandlerView(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.ApiService/View",
+		FullMethod: "/api.ApiService/handlerView",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).View(ctx, req.(*ViewRequest))
+		return srv.(ApiServiceServer).HandlerView(ctx, req.(*ViewRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -494,52 +526,56 @@ var ApiService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ApiServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Healthz",
-			Handler:    _ApiService_Healthz_Handler,
+			MethodName: "handlerHealthz",
+			Handler:    _ApiService_HandlerHealthz_Handler,
 		},
 		{
-			MethodName: "Err",
-			Handler:    _ApiService_Err_Handler,
+			MethodName: "handlerErr",
+			Handler:    _ApiService_HandlerErr_Handler,
 		},
 		{
-			MethodName: "CreateUser",
-			Handler:    _ApiService_CreateUser_Handler,
+			MethodName: "CheckReadiness",
+			Handler:    _ApiService_CheckReadiness_Handler,
 		},
 		{
-			MethodName: "GetUser",
-			Handler:    _ApiService_GetUser_Handler,
+			MethodName: "handlerCreateUser",
+			Handler:    _ApiService_HandlerCreateUser_Handler,
 		},
 		{
-			MethodName: "CreateFeed",
-			Handler:    _ApiService_CreateFeed_Handler,
+			MethodName: "handlerGetUser",
+			Handler:    _ApiService_HandlerGetUser_Handler,
 		},
 		{
-			MethodName: "CreateFeedFollow",
-			Handler:    _ApiService_CreateFeedFollow_Handler,
+			MethodName: "handlerCreateFeed",
+			Handler:    _ApiService_HandlerCreateFeed_Handler,
 		},
 		{
-			MethodName: "DeleteFeedFollows",
-			Handler:    _ApiService_DeleteFeedFollows_Handler,
+			MethodName: "handlerCreateFeedFollow",
+			Handler:    _ApiService_HandlerCreateFeedFollow_Handler,
 		},
 		{
-			MethodName: "View",
-			Handler:    _ApiService_View_Handler,
+			MethodName: "handlerDeleteFeedFollows",
+			Handler:    _ApiService_HandlerDeleteFeedFollows_Handler,
+		},
+		{
+			MethodName: "handlerView",
+			Handler:    _ApiService_HandlerView_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "GetFeeds",
-			Handler:       _ApiService_GetFeeds_Handler,
+			StreamName:    "handlerGetFeeds",
+			Handler:       _ApiService_HandlerGetFeeds_Handler,
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "GetFeedFollows",
-			Handler:       _ApiService_GetFeedFollows_Handler,
+			StreamName:    "handlerGetFeedFollows",
+			Handler:       _ApiService_HandlerGetFeedFollows_Handler,
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "GetPostsForUser",
-			Handler:       _ApiService_GetPostsForUser_Handler,
+			StreamName:    "handlerGetPostsForUser",
+			Handler:       _ApiService_HandlerGetPostsForUser_Handler,
 			ServerStreams: true,
 		},
 	},
