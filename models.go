@@ -76,18 +76,20 @@ func databaseFeedsToFeeds(dbFeeds []database.Feed) []Feed {
 	return feeds
 }
 
-func databaseFeedFollowToFeedFollow(dbFeedFollow database.FeedFollow) FeedFollow {
-	return FeedFollow{
-		ID:        dbFeedFollow.ID,
-		CreatedAt: dbFeedFollow.CreatedAt,
-		UpdatedAt: dbFeedFollow.UpdatedAt,
-		UserID:    dbFeedFollow.UserID,
-		FeedID:    dbFeedFollow.FeedID,
+func databaseFeedFollowToFeedFollow(dbFeedFollow database.FeedFollow) *api.FeedFollow {
+	createdAt := timestamppb.New(dbFeedFollow.CreatedAt)
+	updatedAt := timestamppb.New(dbFeedFollow.UpdatedAt)
+	return &api.FeedFollow{
+		Id:        dbFeedFollow.ID.String(),
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+		UserId:    dbFeedFollow.UserID.String(),
+		FeedId:    dbFeedFollow.FeedID.String(),
 	}
 }
 
-func databaseFeedFollowsToFeedFollows(feedFollows []database.FeedFollow) []FeedFollow {
-	result := make([]FeedFollow, len(feedFollows))
+func databaseFeedFollowsToFeedFollows(feedFollows []database.FeedFollow) []*api.FeedFollow {
+	result := make([]*api.FeedFollow, len(feedFollows))
 	for i, feedFollow := range feedFollows {
 		result[i] = databaseFeedFollowToFeedFollow(feedFollow)
 	}
