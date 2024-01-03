@@ -1,0 +1,10 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8008:8008"
+    environment:
+       DB_URL: postgres://app:app1234@db:5432/rssaggr?sslmode=disable
