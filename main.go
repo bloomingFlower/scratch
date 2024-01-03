@@ -62,7 +62,7 @@ func main() {
 		UnimplementedApiServiceServer: api.UnimplementedApiServiceServer{},
 		DB:                            db,
 	}
-	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(s.middlewareAuth))
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(s.middlewareAuth), grpc.StreamInterceptor(s.middlewareAuthStream))
 	reflection.Register(grpcServer)
 	api.RegisterApiServiceServer(grpcServer, s)
 	if err := grpcServer.Serve(lis); err != nil {
