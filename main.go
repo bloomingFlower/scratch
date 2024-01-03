@@ -27,9 +27,9 @@ func (s *server) Healthz(ctx context.Context, req *api.HealthzRequest) (*api.Hea
 	return nil, status.Errorf(codes.Unimplemented, "method Healthz not implemented")
 }
 
-type apiConfig struct {
-	DB *database.Queries
-}
+//type apiConfig struct {
+//	DB *database.Queries
+//}
 
 func main() {
 	godotenv.Load(".env")
@@ -62,7 +62,7 @@ func main() {
 		UnimplementedApiServiceServer: api.UnimplementedApiServiceServer{},
 		DB:                            db,
 	}
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(s.middlewareAuth))
 	reflection.Register(grpcServer)
 	api.RegisterApiServiceServer(grpcServer, s)
 	if err := grpcServer.Serve(lis); err != nil {

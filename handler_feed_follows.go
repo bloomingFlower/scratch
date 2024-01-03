@@ -2,15 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	api "github.com/bloomingFlower/rssagg/protos"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/http"
 	"time"
 
 	"github.com/bloomingFlower/rssagg/internal/database"
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
@@ -80,23 +77,35 @@ func (s *server) HandlerGetFeedFollows(req *api.GetFeedFollowsRequest, stream ap
 //
 //}
 
-func (apiCfg *apiConfig) handlerDeleteFeedFollows(w http.ResponseWriter, r *http.Request, user database.User) {
-	feedFollowIDstr := chi.URLParam(r, "feedFollowID")
-	feedFollowID, err := uuid.Parse(feedFollowIDstr)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn't parse feed follow id: %v", err))
-		return
-	}
-
-	apiCfg.DB.DeleteFeedFollow(r.Context(), database.DeleteFeedFollowParams{
-		ID:     feedFollowID,
-		UserID: user.ID,
+func (s *server) HandlerDeleteFeedFollows(ctx context.Context, req *api.DeleteFeedFollowsRequest) (*api.Empty, error) {
+	err := s.DB.DeleteFeedFollow(ctx, database.DeleteFeedFollowParams{
+		ID:     uuid.MustParse(req.Id),
+		UserID: uuid.MustParse(req.UserId),
 	})
-
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn't delete feed follow: %v", err))
-		return
+		return nil, status.Errorf(codes.Internal, "Couldn't delete feed follow: %v", err)
 	}
 
-	respondWithJSON(w, http.StatusOK, struct{}{})
+	return &api.Empty{}, nil
 }
+
+//func (apiCfg *apiConfig) handlerDeleteFeedFollows(w http.ResponseWriter, r *http.Request, user database.User) {
+//	feedFollowIDstr := chi.URLParam(r, "feedFollowID")
+//	feedFollowID, err := uuid.Parse(feedFollowIDstr)
+//	if err != nil {
+//		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn't parse feed follow id: %v", err))
+//		return
+//	}
+//
+//	apiCfg.DB.DeleteFeedFollow(r.Context(), database.DeleteFeedFollowParams{
+//		ID:     feedFollowID,
+//		UserID: user.ID,
+//	})
+//
+//	if err != nil {
+//		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn't delete feed follow: %v", err))
+//		return
+//	}
+//
+//	respondWithJSON(w, http.StatusOK, struct{}{})
+//}

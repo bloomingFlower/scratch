@@ -31,7 +31,7 @@ type ApiServiceClient interface {
 	HandlerGetFeeds(ctx context.Context, in *GetFeedsRequest, opts ...grpc.CallOption) (ApiService_HandlerGetFeedsClient, error)
 	HandlerCreateFeedFollow(ctx context.Context, in *CreateFeedFollowRequest, opts ...grpc.CallOption) (*FeedFollow, error)
 	HandlerGetFeedFollows(ctx context.Context, in *GetFeedFollowsRequest, opts ...grpc.CallOption) (ApiService_HandlerGetFeedFollowsClient, error)
-	HandlerDeleteFeedFollows(ctx context.Context, in *DeleteFeedFollowsRequest, opts ...grpc.CallOption) (*FeedFollow, error)
+	HandlerDeleteFeedFollows(ctx context.Context, in *DeleteFeedFollowsRequest, opts ...grpc.CallOption) (*Empty, error)
 	HandlerGetPostsForUser(ctx context.Context, in *GetPostsForUserRequest, opts ...grpc.CallOption) (ApiService_HandlerGetPostsForUserClient, error)
 	HandlerView(ctx context.Context, in *ViewRequest, opts ...grpc.CallOption) (*ViewResponse, error)
 }
@@ -171,8 +171,8 @@ func (x *apiServiceHandlerGetFeedFollowsClient) Recv() (*FeedFollow, error) {
 	return m, nil
 }
 
-func (c *apiServiceClient) HandlerDeleteFeedFollows(ctx context.Context, in *DeleteFeedFollowsRequest, opts ...grpc.CallOption) (*FeedFollow, error) {
-	out := new(FeedFollow)
+func (c *apiServiceClient) HandlerDeleteFeedFollows(ctx context.Context, in *DeleteFeedFollowsRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/api.ApiService/handlerDeleteFeedFollows", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -234,7 +234,7 @@ type ApiServiceServer interface {
 	HandlerGetFeeds(*GetFeedsRequest, ApiService_HandlerGetFeedsServer) error
 	HandlerCreateFeedFollow(context.Context, *CreateFeedFollowRequest) (*FeedFollow, error)
 	HandlerGetFeedFollows(*GetFeedFollowsRequest, ApiService_HandlerGetFeedFollowsServer) error
-	HandlerDeleteFeedFollows(context.Context, *DeleteFeedFollowsRequest) (*FeedFollow, error)
+	HandlerDeleteFeedFollows(context.Context, *DeleteFeedFollowsRequest) (*Empty, error)
 	HandlerGetPostsForUser(*GetPostsForUserRequest, ApiService_HandlerGetPostsForUserServer) error
 	HandlerView(context.Context, *ViewRequest) (*ViewResponse, error)
 	mustEmbedUnimplementedApiServiceServer()
@@ -271,7 +271,7 @@ func (UnimplementedApiServiceServer) HandlerCreateFeedFollow(context.Context, *C
 func (UnimplementedApiServiceServer) HandlerGetFeedFollows(*GetFeedFollowsRequest, ApiService_HandlerGetFeedFollowsServer) error {
 	return status.Errorf(codes.Unimplemented, "method HandlerGetFeedFollows not implemented")
 }
-func (UnimplementedApiServiceServer) HandlerDeleteFeedFollows(context.Context, *DeleteFeedFollowsRequest) (*FeedFollow, error) {
+func (UnimplementedApiServiceServer) HandlerDeleteFeedFollows(context.Context, *DeleteFeedFollowsRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HandlerDeleteFeedFollows not implemented")
 }
 func (UnimplementedApiServiceServer) HandlerGetPostsForUser(*GetPostsForUserRequest, ApiService_HandlerGetPostsForUserServer) error {

@@ -15,7 +15,7 @@ service ApiService {
   rpc handlerGetFeeds(GetFeedsRequest) returns (stream Feed) {}
   rpc handlerCreateFeedFollow(CreateFeedFollowRequest) returns (FeedFollow) {}
   rpc handlerGetFeedFollows(GetFeedFollowsRequest) returns (stream FeedFollow) {}
-  rpc handlerDeleteFeedFollows(DeleteFeedFollowsRequest) returns (FeedFollow) {}
+  rpc handlerDeleteFeedFollows(DeleteFeedFollowsRequest) returns (Empty) {}
   rpc handlerGetPostsForUser(GetPostsForUserRequest) returns (stream Post) {}
   rpc handlerView(ViewRequest) returns (ViewResponse) {}
 }
@@ -139,4 +139,7 @@ message ReadinessRequest {
 
 message ReadinessResponse {
   bool isReady = 1;
+}
+
+message Empty {
 }

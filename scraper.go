@@ -46,7 +46,14 @@ func startScraping(
 		for _, feed := range feeds {
 			wg.Add(1)
 
-			go scrapeFeed(db, wg, feed)
+			go func() {
+				updatedPosts, err := scrapeFeed(db, wg, feed)
+				if err != nil {
+					log.Printf("Error scraping feed: %v", err)
+					return
+				}
+				log.Printf("Updated %d posts", updatedPosts)
+			}()
 		}
 		wg.Wait()
 
@@ -56,21 +63,22 @@ func startScraping(
 	}
 }
 
-func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
+func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) (int, error) {
 	defer wg.Done()
 
 	_, err := db.MarkFeedAsFetched(context.Background(), feed.ID)
 	if err != nil {
 		log.Println("Error marking feed as fetched:", err)
-		return
+		return 0, err
 	}
 
 	rssFeed, err := urlToFeed(feed.Url)
 	if err != nil {
 		log.Println("Error fetching feed:", err)
-		return
+		return 0, err
 	}
 
+	updatedPosts := 0
 	for _, item := range rssFeed.Channel.Item {
 		description := sql.NullString{}
 		if item.Description != "" {
@@ -80,7 +88,7 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 
 		pubAt, err := time.Parse(time.RFC1123Z, item.PubDate)
 		if err != nil {
-			log.Println("couldn't parse date %v with err %v", item.PubDate, err)
+			log.Printf("couldn't parse date %v with err %v\n", item.PubDate, err)
 			continue
 		}
 
@@ -100,10 +108,12 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 				continue
 			}
 			log.Println("failed to create post: ", err)
-
+		} else {
+			updatedPosts++
 		}
 
 		//log.Println("Found post", item.Title, "on feed", feed.Name)
 	}
-	log.Printf("Feed %s collected, %v posts found", feed.Name, len(rssFeed.Channel.Item))
+	log.Printf("Feed %s collected, %v posts found, %v posts updated", feed.Name, len(rssFeed.Channel.Item), updatedPosts)
+	return updatedPosts, nil
 }

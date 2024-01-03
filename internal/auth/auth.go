@@ -1,7 +1,9 @@
 package auth
 
 import (
+	"context"
 	"errors"
+	api "github.com/bloomingFlower/rssagg/protos"
 	"net/http"
 	"strings"
 )
@@ -25,4 +27,24 @@ func GetAPIKey(headers http.Header) (string, error) {
 		return "", errors.New("malformed first part of auth header")
 	}
 	return vals[1], nil
+}
+
+// GetAPIKeyFromContext extracts an API Key from
+// the context of a gRPC request
+func GetAPIKeyFromContext(ctx context.Context) (string, error) {
+	val := ctx.Value("api_key")
+	if val == nil {
+		return "", errors.New("no API key found in context")
+	}
+
+	apiKey, ok := val.(string)
+	if !ok {
+		return "", errors.New("API key is not a string")
+	}
+
+	return apiKey, nil
+}
+
+func ContextWithUser(ctx context.Context, user *api.User) context.Context {
+	return context.WithValue(ctx, "user", user)
 }
