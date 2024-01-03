@@ -5,6 +5,7 @@ import (
 	"github.com/bloomingFlower/rssagg/internal/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"log"
 )
@@ -43,11 +44,17 @@ func (s *server) middlewareAuth(ctx context.Context, req interface{}, info *grpc
 	if allowedMethods[info.FullMethod] {
 		return handler(ctx, req)
 	} else {
-		apiKey, err := auth.GetAPIKeyFromContext(ctx)
-		log.Printf("API key: %s", apiKey)
-		if err != nil {
-			return nil, status.Errorf(codes.Unauthenticated, "Auth error: %v", err)
+		md, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
 		}
+
+		apiKeys, ok := md["api_key"]
+		if !ok || len(apiKeys) == 0 {
+			return nil, status.Errorf(codes.Unauthenticated, "api key is not provided")
+		}
+
+		apiKey := apiKeys[0]
 
 		user, err := s.DB.GetUserByAPIKey(ctx, apiKey)
 		if err != nil {
@@ -66,10 +73,17 @@ func (s *server) middlewareAuthStream(srv interface{}, ss grpc.ServerStream, inf
 	log.Println("stream info.FullMethod:", info.FullMethod)
 	// Check if the method is one of the methods that should not pass through the interceptor
 	if allowedMethods[info.FullMethod] {
-		apiKey, err := auth.GetAPIKeyFromContext(ctx)
-		if err != nil {
-			return status.Errorf(codes.Unauthenticated, "Auth error: %v", err)
+		md, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			return status.Errorf(codes.Unauthenticated, "metadata is not provided")
 		}
+
+		apiKeys, ok := md["api_key"]
+		if !ok || len(apiKeys) == 0 {
+			return status.Errorf(codes.Unauthenticated, "api key is not provided")
+		}
+
+		apiKey := apiKeys[0]
 
 		user, err := s.DB.GetUserByAPIKey(ctx, apiKey)
 		if err != nil {
