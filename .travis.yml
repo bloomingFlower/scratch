@@ -1,0 +1,21 @@
+language: go
+
+go:
+  - 1.21.x
+
+env:
+#  - GO111MODULE=on
+
+install: true
+
+script:
+  - go test -v ./...
+  - go build
+
+#deploy:
+#  provider: releases
+#  api_key: $GITHUB_TOKEN
+#  file: "YOUR_BINARY_FILE"
+#  skip_cleanup: true
+#  on:
+#    tags: true
