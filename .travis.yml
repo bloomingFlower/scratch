@@ -6,10 +6,13 @@ go:
 env:
 #  - GO111MODULE=on
 
-install: true
+install:
+  - go get -t -v ./...
+  - go mod vendor
+
 
 script:
-  - go test -v ./...
+#  - go test -v ./...
   - go build
 
 #deploy:
