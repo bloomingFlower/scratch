@@ -7,4 +7,7 @@ services:
     ports:
       - "8008:8008"
     environment:
-       DB_URL: postgres://app:app1234@db:5432/rssaggr?sslmode=disable
+       DB_URL: postgres://        bool hasFavoriteNumber = true;
+        uint256 favoriteNumber; // default value equals to zero
+        string favoriteNumberInText = "Five";
+        bytes32 favoriteBytes = "0x0000000000000000000000000000000000000000000000000000000000000005";:app1234@db:5432/rssaggr?sslmode=disable

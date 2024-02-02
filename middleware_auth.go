@@ -30,13 +30,13 @@ import (
 //		}
 //	}
 var allowedMethods = map[string]bool{
-	"/ApiService/handlerHealthz":          true,
-	"/ApiService/handlerGetUser":          true,
-	"/ApiService/handlerGetFeed":          true,
-	"/ApiService/handlerGetPostsForUser":  true,
-	"/ApiService/handlerGetFeedFollows":   true,
-	"/ApiService/handlerCreateFeedFollow": true,
-	"/ApiService/handlerCreateUser":       true,
+	"/api.ApiService/handlerHealthz":          true,
+	"/api.ApiService/handlerGetUser":          true,
+	"/api.ApiService/handlerGetFeed":          true,
+	"/api.ApiService/handlerGetPostsForUser":  true,
+	"/api.ApiService/handlerGetFeedFollows":   true,
+	"/api.ApiService/handlerCreateFeedFollow": true,
+	"/api.ApiService/handlerCreateUser":       true,
 }
 
 func (s *server) middlewareAuth(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
