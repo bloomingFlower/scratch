@@ -1,24 +1,17 @@
 language: go
-
 go:
-  - 1.21.x
-
-env:
-#  - GO111MODULE=on
-
+- 1.21.x
+before_install:
+- openssl aes-256-cbc -K $encrypted_2d8c63ef40a5_key -iv $encrypted_2d8c63ef40a5_iv
+  -in id_rsa.enc -out ../id_rsa -d
+- chmod 600 ../id_rsa
+- echo -e "Host $DEPLOY_SERVER\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 install:
-  - go get -t -v ./...
-  - go mod vendor
-
-
+- go get -t -v ./...
 script:
-#  - go test -v ./...
-  - go build
+- go test -v ./...
+after_success:
+- rsync -rave "ssh -i ../id_rsa" --exclude=node_modules . $DEPLOY_USER@$DEPLOY_SERVER:~/blog-scratch
+- ssh -i ../id_rsa $DEPLOY_USER@$DEPLOY_SERVER 'mkdir -p blog-scratch && cd blog-scratch
+  && docker build -t blog-scratch .'
 
-#deploy:
-#  provider: releases
-#  api_key: $GITHUB_TOKEN
-#  file: "YOUR_BINARY_FILE"
-#  skip_cleanup: true
-#  on:
-#    tags: true
