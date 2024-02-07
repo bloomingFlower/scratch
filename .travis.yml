@@ -8,6 +8,7 @@ before_install:
 - echo -e "Host $DEPLOY_SERVER\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 install:
 - go get -t -v ./...
+- go mod vendor
 script:
 - go test -v ./...
 after_success:
