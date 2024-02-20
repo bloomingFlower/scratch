@@ -18,7 +18,7 @@ COPY . .
 COPY .env /root/.env
 
 # Build the Go app
-RUN go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
 # Expose port 50051 to the outside world
 EXPOSE 50051
