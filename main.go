@@ -68,7 +68,7 @@ func main() {
 	//	DB: db,
 	//}
 
-	go startScraping(db, 10, time.Minute)
+	go startScraping(db, 60, time.Minute)
 	//
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
