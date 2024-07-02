@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"strconv"
+	"time"
+
 	api "github.com/bloomingFlower/rssagg/protos"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"time"
 
 	"github.com/bloomingFlower/rssagg/internal/database"
 	"github.com/google/uuid"
@@ -57,9 +59,14 @@ func (s *server) HandlerGetUser(ctx context.Context, req *api.GetUserRequest) (*
 //}
 
 func (s *server) HandlerGetPostsForUser(req *api.GetPostsForUserRequest, stream api.ApiService_HandlerGetPostsForUserServer) error {
+	limit, err := strconv.Atoi(req.Limit)
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument, "Limit must be an integer: %v", err)
+	}
+
 	posts, err := s.DB.GetPostsForUser(context.Background(), database.GetPostsForUserParams{
 		UserID: uuid.MustParse(req.UserId),
-		Limit:  10,
+		Limit:  int32(limit),
 	})
 	if err != nil {
 		return status.Errorf(codes.Internal, "Couldn't get posts for user: %v", err)
