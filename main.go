@@ -3,17 +3,19 @@ package main
 import (
 	"context"
 	"database/sql"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc/status"
 	"log"
 	"net"
 	"os"
 	"time"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
+
 	"github.com/bloomingFlower/rssagg/internal/database"
 	api "github.com/bloomingFlower/rssagg/protos"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -30,6 +32,20 @@ func (s *server) Healthz(ctx context.Context, req *api.HealthzRequest) (*api.Hea
 //type apiConfig struct {
 //	DB *database.Queries
 //}
+
+func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	// 요청을 받을 때마다 로그를 출력합니다.
+	log.Printf("Received gRPC request - Method: %s", info.FullMethod)
+	// 다음 핸들러를 호출합니다.
+	return handler(ctx, req)
+}
+
+func loggingStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	// 스트림 요청을 받을 때마다 로그를 출력합니다.
+	log.Printf("Received gRPC stream request - Method: %s", info.FullMethod)
+	// 다음 핸들러를 호출합니다.
+	return handler(srv, ss)
+}
 
 func main() {
 	godotenv.Load(".env")
@@ -62,7 +78,20 @@ func main() {
 		UnimplementedApiServiceServer: api.UnimplementedApiServiceServer{},
 		DB:                            db,
 	}
-	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(s.middlewareAuth), grpc.StreamInterceptor(s.middlewareAuthStream))
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				loggingInterceptor, // 추가할 Unary 인터셉터
+				s.middlewareAuth,   // 기존 Unary 인터셉터
+			),
+		),
+		grpc.StreamInterceptor(
+			grpc_middleware.ChainStreamServer(
+				s.middlewareAuthStream,   // 기존 Stream 인터셉터
+				loggingStreamInterceptor, // 추가할 Stream 인터셉터
+			),
+		),
+	)
 	reflection.Register(grpcServer)
 	api.RegisterApiServiceServer(grpcServer, s)
 	if err := grpcServer.Serve(lis); err != nil {
