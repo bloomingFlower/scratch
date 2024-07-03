@@ -48,7 +48,12 @@ func loggingStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.
 }
 
 func main() {
-	godotenv.Load(".env")
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Printf("Error loading env file: %v", err)
+		return
+	}
+	log.Printf("Loaded env file")
 	portString := os.Getenv("PORT")
 	if portString == "" {
 		log.Fatal("PORT is not found in the environment")
