@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"time"
+
 	api "github.com/bloomingFlower/rssagg/protos"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"time"
 
 	"github.com/bloomingFlower/rssagg/internal/database"
 	"github.com/google/uuid"
@@ -62,7 +63,7 @@ func (s *server) HandlerGetFeeds(req *api.GetFeedsRequest, stream api.ApiService
 			LastFetchedAt: feed.LastFetchedAt.Time.Format(time.RFC3339),
 		})
 		if err != nil {
-			return err
+			return status.Errorf(codes.Internal, "Error sending feed: %v", err)
 		}
 	}
 	return nil
