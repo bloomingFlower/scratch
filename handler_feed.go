@@ -48,7 +48,8 @@ func (s *server) HandlerCreateFeed(ctx context.Context, req *api.CreateFeedReque
 }
 
 func (s *server) HandlerGetFeeds(req *api.GetFeedsRequest, stream api.ApiService_HandlerGetFeedsServer) error {
-	feeds, err := s.DB.GetFeeds(context.Background())
+	ctx := stream.Context()
+	feeds, err := s.DB.GetFeeds(ctx)
 	if err != nil {
 		return status.Errorf(codes.Internal, "Couldn't get feeds: %v", err)
 	}
