@@ -46,6 +46,7 @@ func startScraping(
 		for _, feed := range feeds {
 			wg.Add(1)
 
+			feed := feed
 			go func() {
 				updatedPosts, err := scrapeFeed(db, wg, feed)
 				if err != nil {

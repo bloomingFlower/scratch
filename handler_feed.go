@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	api "github.com/bloomingFlower/rssagg/protos"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -67,5 +69,13 @@ func (s *server) HandlerGetFeeds(req *api.GetFeedsRequest, stream api.ApiService
 			return status.Errorf(codes.Internal, "Error sending feed: %v", err)
 		}
 	}
+
+	// 트레일러 설정
+	trailer := metadata.Pairs(
+		"total-feeds", fmt.Sprintf("%d", len(feeds)),
+		"status", "success",
+	)
+	stream.SetTrailer(trailer)
+
 	return nil
 }

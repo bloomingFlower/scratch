@@ -1,8 +1,9 @@
 package main
 
 import (
-	api "github.com/bloomingFlower/rssagg/protos"
 	"time"
+
+	api "github.com/bloomingFlower/rssagg/protos"
 
 	"github.com/bloomingFlower/rssagg/internal/database"
 	"github.com/google/uuid"
