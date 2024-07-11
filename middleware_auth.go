@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"log"
+
 	"github.com/bloomingFlower/rssagg/internal/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"log"
 )
 
 //type authedHander func(http.ResponseWriter, *http.Request, database.User)
@@ -43,28 +44,46 @@ func (s *server) middlewareAuth(ctx context.Context, req interface{}, info *grpc
 	log.Println("unary info.FullMethod:", info.FullMethod)
 	if allowedMethods[info.FullMethod] {
 		return handler(ctx, req)
-	} else {
-		md, ok := metadata.FromIncomingContext(ctx)
-		if !ok {
-			return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
-		}
-
-		apiKeys, ok := md["api_key"]
-		if !ok || len(apiKeys) == 0 {
-			return nil, status.Errorf(codes.Unauthenticated, "api key is not provided")
-		}
-
-		apiKey := apiKeys[0]
-
-		user, err := s.DB.GetUserByAPIKey(ctx, apiKey)
-		if err != nil {
-			return nil, status.Errorf(codes.NotFound, "Couldn't get user: %v", err)
-		}
-
-		apiUser := databaseUserToUser(user)
-		ctx = auth.ContextWithUser(ctx, apiUser)
 	}
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
+	}
+
+	apiKeys, ok := md["api_key"]
+	if !ok || len(apiKeys) == 0 {
+		return nil, status.Errorf(codes.Unauthenticated, "api key is not provided")
+	}
+
+	apiKey := apiKeys[0]
+
+	user, err := s.DB.GetUserByAPIKey(ctx, apiKey)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "Couldn't get user: %v", err)
+	}
+
+	apiUser := databaseUserToUser(user)
+	ctx = auth.ContextWithUser(ctx, apiUser)
 	return handler(ctx, req)
+}
+
+// Ad-hoc helper struct to wrap a ServerStream with a new context
+type contextServerStream struct {
+	grpc.ServerStream
+	ctx context.Context
+}
+
+// NewContextServerStream creates a new ServerStream with the given context
+func newContextServerStream(stream grpc.ServerStream, ctx context.Context) *contextServerStream {
+	return &contextServerStream{
+		ServerStream: stream,
+		ctx:          ctx,
+	}
+}
+
+func (s *contextServerStream) Context() context.Context {
+	return s.ctx
 }
 
 func (s *server) middlewareAuthStream(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
@@ -94,6 +113,9 @@ func (s *server) middlewareAuthStream(srv interface{}, ss grpc.ServerStream, inf
 		ctx = auth.ContextWithUser(ctx, apiUser)
 	}
 
-	// Continue execution of the handler
-	return handler(srv, ss)
+	// Create a new context-aware ServerStream
+	wrappedStream := grpc.ServerStream(newContextServerStream(ss, ctx))
+
+	// Continue execution of the handler with the wrapped stream
+	return handler(srv, wrappedStream)
 }
