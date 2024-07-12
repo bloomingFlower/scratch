@@ -98,6 +98,9 @@ func databaseFeedFollowsToFeedFollows(feedFollows []database.FeedFollow) []*api.
 }
 
 func databasePostToPost(dbPost database.Post) *api.Post {
+	if dbPost == (database.Post{}) {
+		return nil
+	}
 	var description *string
 	if dbPost.Description.Valid {
 		description = &dbPost.Description.String

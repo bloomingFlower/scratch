@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -77,12 +78,22 @@ func (s *server) HandlerGetPostsForUser(req *api.GetPostsForUserRequest, stream 
 		Limit:  int32(limit),
 	})
 	if err != nil {
+		log.Printf("Error getting posts for user: %v", err)
 		return status.Errorf(codes.Internal, "Couldn't get posts for user: %v", err)
+	}
+	if len(posts) == 0 {
+		return status.Errorf(codes.NotFound, "No posts found for user")
 	}
 
 	// Send each post to the stream
 	for _, post := range posts {
-		if err := stream.Send(databasePostToPost(post)); err != nil {
+		log.Printf("Processing post: %+v", post)
+		apiPost := databasePostToPost(post)
+		if apiPost == nil {
+			log.Printf("Failed to convert database post to API post")
+			continue
+		}
+		if err := stream.Send(apiPost); err != nil {
 			return status.Errorf(codes.Internal, "Failed to send post: %v", err)
 		}
 	}
