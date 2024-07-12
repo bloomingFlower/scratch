@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"time"
 
 	api "github.com/bloomingFlower/rssagg/protos"
@@ -101,9 +102,13 @@ func databasePostToPost(dbPost database.Post) *api.Post {
 	if dbPost == (database.Post{}) {
 		return nil
 	}
-	var description *string
+	if dbPost.ID == uuid.Nil {
+		log.Printf("Encountered post with nil ID")
+		return nil
+	}
+	var description string
 	if dbPost.Description.Valid {
-		description = &dbPost.Description.String
+		description = dbPost.Description.String
 	}
 	createdAt := timestamppb.New(dbPost.CreatedAt)
 	updatedAt := timestamppb.New(dbPost.UpdatedAt)
@@ -114,7 +119,7 @@ func databasePostToPost(dbPost database.Post) *api.Post {
 		CreatedAt:   createdAt,
 		UpdatedAt:   updatedAt,
 		Title:       dbPost.Title,
-		Description: *description,
+		Description: description,
 		PublishedAt: publishedAt,
 		Url:         dbPost.Url,
 		FeedId:      dbPost.FeedID.String(),
