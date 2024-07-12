@@ -31,11 +31,7 @@ jobs:
     - stage: deploy
       script:
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        - export VERSION=$(git rev-parse --short HEAD)
-        - docker build --build-arg VERSION=$VERSION -t $DOCKER_IMAGE:$VERSION .
-        - docker tag $DOCKER_IMAGE:$VERSION $DOCKER_IMAGE:latest
-        - docker push $DOCKER_IMAGE:$VERSION
-        - docker push $DOCKER_IMAGE:latest
       after_success:
+        - export VERSION=$(git rev-parse --short HEAD)
         - rsync -rave "ssh -i ~/.ssh/id_rsa" --exclude=node_modules . $DEPLOY_USER@$DEPLOY_SERVER:~/blog-scratch
-        - ssh -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "cd ~/blog-scratch && docker pull $DOCKER_IMAGE:latest && docker-compose up -d"
+        - ssh -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "cd ~/blog-scratch && docker build --build-arg VERSION=$VERSION -t $DOCKER_IMAGE:$VERSION . && docker tag $DOCKER_IMAGE:$VERSION $DOCKER_IMAGE:latest && docker push $DOCKER_IMAGE:$VERSION && docker push $DOCKER_IMAGE:latest && docker-compose up -d"
