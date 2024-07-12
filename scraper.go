@@ -93,11 +93,12 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) (i
 			continue
 		}
 
+		// Create a new post in the database
 		_, err = db.CreatePost(context.Background(), database.CreatePostParams{
-			ID:          uuid.New(),
-			CreatedAt:   time.Now().UTC(),
-			UpdatedAt:   time.Now().UTC(),
-			Title:       item.Title,
+			ID:          uuid.New(),       // Generate a new UUID for the post ID
+			CreatedAt:   time.Now().UTC(), // Set the creation time to the current time in UTC
+			UpdatedAt:   time.Now().UTC(), // Set the update time to the current time in UTC
+			Title:       item.Title,       // Set the post title to the item's title
 			Description: description,
 			PublishedAt: pubAt,
 			Url:         item.Link,
@@ -112,9 +113,11 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) (i
 		} else {
 			updatedPosts++
 		}
-
-		//log.Println("Found post", item.Title, "on feed", feed.Name)
 	}
-	log.Printf("Feed %s collected, %v posts found, %v posts updated", feed.Name, len(rssFeed.Channel.Item), updatedPosts)
+
+	if updatedPosts > 0 {
+		log.Printf("Feed %s collected, %v new posts found", feed.Name, updatedPosts)
+	}
+
 	return updatedPosts, nil
 }
