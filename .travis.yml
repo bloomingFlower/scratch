@@ -20,12 +20,13 @@ before_install:
 
 install:
   - go mod download
-  
+  - go mod vendor
+
 jobs:
   include:
     - stage: test
       script:
-        - go test -v ./...
+        - go test -mod=vendor -v ./...
 
     - stage: deploy
       script:
