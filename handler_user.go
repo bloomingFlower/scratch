@@ -59,23 +59,33 @@ func (s *server) HandlerGetUser(ctx context.Context, req *api.GetUserRequest) (*
 //}
 
 func (s *server) HandlerGetPostsForUser(req *api.GetPostsForUserRequest, stream api.ApiService_HandlerGetPostsForUserServer) error {
+	// Limit parsing
 	limit, err := strconv.Atoi(req.Limit)
 	if err != nil {
 		return status.Errorf(codes.InvalidArgument, "Limit must be an integer: %v", err)
 	}
 
-	posts, err := s.DB.GetPostsForUser(context.Background(), database.GetPostsForUserParams{
-		UserID: uuid.MustParse(req.UserId),
+	// UUID parsing
+	userID, err := uuid.Parse(req.UserId)
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument, "Invalid user ID: %v", err)
+	}
+
+	// Use stream context
+	posts, err := s.DB.GetPostsForUser(stream.Context(), database.GetPostsForUserParams{
+		UserID: userID,
 		Limit:  int32(limit),
 	})
 	if err != nil {
 		return status.Errorf(codes.Internal, "Couldn't get posts for user: %v", err)
 	}
+
+	// Send each post to the stream
 	for _, post := range posts {
-		err := stream.Send(databasePostToPost(post))
-		if err != nil {
-			return err
+		if err := stream.Send(databasePostToPost(post)); err != nil {
+			return status.Errorf(codes.Internal, "Failed to send post: %v", err)
 		}
 	}
+
 	return nil
 }
