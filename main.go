@@ -48,15 +48,13 @@ func loggingStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.
 }
 
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Printf("Error loading env file: %v", err)
-		return
-	}
-	log.Printf("Loaded env file")
-	portString := os.Getenv("PORT")
-	if portString == "" {
-		log.Fatal("PORT is not found in the environment")
+	// .env is a local-development convenience only. In the cluster the config
+	// comes from the container environment, so a missing file must not stop the
+	// process (it used to `return` out of main here, exiting silently) — and the
+	// image must not ship a .env, which is how a live DB password ended up in a
+	// public image layer.
+	if err := godotenv.Load(".env"); err != nil {
+		log.Printf("No .env file (%v); using the process environment", err)
 	}
 	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
