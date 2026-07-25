@@ -1,27 +1,50 @@
-# Start from the latest golang base image
-FROM golang:1.21.3 AS builder
+# Multi-stage: only the final stage's layers are published, so the toolchain and
+# the source tree never reach the registry. (The previous version declared
+# `AS builder` but had no second stage, so the published image WAS the builder —
+# it carried .env with a live DB password, the .git history and id_rsa.enc, and
+# weighed 1.6GB.)
+#
+# The builder runs on the native build platform and cross-compiles to the target
+# arch (pure Go, CGO disabled), avoiding a QEMU-emulated build.
+# Pinned to the toolchain this vendored tree was built with: the vendored
+# protobuf v1.33.0 does not compile under Go 1.24 (its build-tagged unsafe
+# implementation files don't match, giving "undefined: value/nilType" errors).
+FROM --platform=$BUILDPLATFORM golang:1.21.3 AS builder
 
-# Add Maintainer Info
 LABEL maintainer="JYY <yourrubber@duck.com>"
 
-# Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Copy go mod and sum files
+ARG TARGETOS TARGETARCH
+
+# Build in module mode (-mod=mod), NOT against the committed vendor/ tree.
+# That tree is missing protobuf's build-tagged unsafe implementation
+# (only value_pure.go is vendored), so `go build -mod=vendor` fails with
+# "undefined: value/nilType" — i.e. the vendored path no longer builds at all,
+# regardless of this change. go.sum still pins every dependency.
 COPY go.mod go.sum ./
+RUN go mod download
 
-# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
-RUN go mod download && go mod vendor
-
-# Copy the source from the current directory to the Working Directory inside the container
 COPY . .
-COPY .env /root/.env
 
-# Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -installsuffix cgo -o main .
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    go build -mod=mod -a -installsuffix cgo -o main .
 
-# Expose port 50051 to the outside world
+# --- runtime ---
+FROM alpine:3.22
+
+RUN apk --no-cache add ca-certificates \
+    && addgroup -g 10001 appuser \
+    && adduser -D -u 10001 -G appuser appuser
+
+WORKDIR /app
+
+COPY --from=builder /app/main .
+# handler_view.go renders html/view.html at runtime.
+COPY --from=builder /app/html ./html
+
+USER appuser
+
 EXPOSE 50051
 
-# Command to run the executable
 CMD ["./main"]

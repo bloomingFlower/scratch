@@ -1,0 +1,14 @@
+# Never ship secrets or local state into an image layer. The previous image was
+# single-stage with `COPY . .` + `COPY .env /root/.env`, which published a live
+# database password, the git history and an encrypted SSH key to a public repo.
+.env
+.env.*
+*.enc
+id_rsa*
+*.pem
+*.key
+.git
+.gitignore
+.travis.yml
+docker-compose.yml
+README.md
