@@ -12,12 +12,20 @@ import (
 )
 
 func (s *server) HandlerCreateFeedFollow(ctx context.Context, req *api.CreateFeedFollowRequest) (*api.FeedFollow, error) {
+	userID, err := ownUserID(ctx, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	feedID, err := uuid.Parse(req.FeedId)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid feed ID")
+	}
 	feedFollow, err := s.DB.CreateFeedFollow(ctx, database.CreateFeedFollowParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
-		UserID:    uuid.MustParse(req.UserId),
-		FeedID:    uuid.MustParse(req.FeedId),
+		UserID:    userID,
+		FeedID:    feedID,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Couldn't create feed follow: %v", err)
@@ -52,7 +60,11 @@ func (s *server) HandlerCreateFeedFollow(ctx context.Context, req *api.CreateFee
 //}
 
 func (s *server) HandlerGetFeedFollows(req *api.GetFeedFollowsRequest, stream api.ApiService_HandlerGetFeedFollowsServer) error {
-	feedFollows, err := s.DB.GetFeedFollows(context.Background(), uuid.MustParse(req.UserId))
+	userID, err := ownUserID(stream.Context(), req.UserId)
+	if err != nil {
+		return err
+	}
+	feedFollows, err := s.DB.GetFeedFollows(stream.Context(), userID)
 	if err != nil {
 		return status.Errorf(codes.Internal, "Couldn't get feed follows: %v", err)
 	}
@@ -78,9 +90,17 @@ func (s *server) HandlerGetFeedFollows(req *api.GetFeedFollowsRequest, stream ap
 //}
 
 func (s *server) HandlerDeleteFeedFollows(ctx context.Context, req *api.DeleteFeedFollowsRequest) (*api.Empty, error) {
-	err := s.DB.DeleteFeedFollow(ctx, database.DeleteFeedFollowParams{
-		ID:     uuid.MustParse(req.Id),
-		UserID: uuid.MustParse(req.UserId),
+	userID, err := ownUserID(ctx, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	feedFollowID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid feed-follow ID")
+	}
+	err = s.DB.DeleteFeedFollow(ctx, database.DeleteFeedFollowParams{
+		ID:     feedFollowID,
+		UserID: userID,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Couldn't delete feed follow: %v", err)

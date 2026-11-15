@@ -16,9 +16,9 @@ import (
 )
 
 func (s *server) HandlerCreateFeed(ctx context.Context, req *api.CreateFeedRequest) (*api.Feed, error) {
-	userID, err := uuid.Parse(req.UserId)
+	userID, err := ownUserID(ctx, req.UserId)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "Invalid user ID: %v", err)
+		return nil, err
 	}
 
 	feed, err := s.DB.CreateFeed(ctx, database.CreateFeedParams{
@@ -51,11 +51,19 @@ func (s *server) HandlerCreateFeed(ctx context.Context, req *api.CreateFeedReque
 
 func (s *server) HandlerGetFeeds(req *api.GetFeedsRequest, stream api.ApiService_HandlerGetFeedsServer) error {
 	ctx := stream.Context()
+	userID, err := currentUserID(ctx)
+	if err != nil {
+		return err
+	}
 	feeds, err := s.DB.GetFeeds(ctx)
 	if err != nil {
 		return status.Errorf(codes.Internal, "Couldn't get feeds: %v", err)
 	}
+	count := 0
 	for _, feed := range feeds {
+		if feed.UserID != userID {
+			continue
+		}
 		err := stream.Send(&api.Feed{
 			Id:            feed.ID.String(),
 			CreatedAt:     timestamppb.New(feed.CreatedAt),
@@ -68,11 +76,12 @@ func (s *server) HandlerGetFeeds(req *api.GetFeedsRequest, stream api.ApiService
 		if err != nil {
 			return status.Errorf(codes.Internal, "Error sending feed: %v", err)
 		}
+		count++
 	}
 
 	// 트레일러 설정
 	trailer := metadata.Pairs(
-		"total-feeds", fmt.Sprintf("%d", len(feeds)),
+		"total-feeds", fmt.Sprintf("%d", count),
 		"status", "success",
 	)
 	stream.SetTrailer(trailer)
