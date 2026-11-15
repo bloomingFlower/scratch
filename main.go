@@ -71,7 +71,11 @@ func main() {
 	//	DB: db,
 	//}
 
-	go startScraping(db, 60, time.Minute)
+	// A read-only deployment probe can exercise authentication against the real
+	// database without starting the periodic feed scraper.
+	if os.Getenv("RSS_SCRAPER_DISABLED") != "true" {
+		go startScraping(db, 60, time.Minute)
+	}
 	//
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
