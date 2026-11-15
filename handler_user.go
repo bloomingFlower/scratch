@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bloomingFlower/rssagg/internal/auth"
 	api "github.com/bloomingFlower/rssagg/protos"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -38,13 +39,12 @@ func (s *server) HandlerCreateUser(ctx context.Context, req *api.CreateUserReque
 //	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 //}
 
-func (s *server) HandlerGetUser(ctx context.Context, req *api.GetUserRequest) (*api.User, error) {
-	user, err := s.DB.GetUserByAPIKey(ctx, req.ApiKey)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Couldn't get user: %v", err)
+func (s *server) HandlerGetUser(ctx context.Context, _ *api.GetUserRequest) (*api.User, error) {
+	user, ok := auth.UserFromContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "authentication required")
 	}
-
-	return databaseUserToUser(user), nil
+	return user, nil
 }
 
 //func (apiCfg *apiConfig) handlerGetPostsForUser(w http.ResponseWriter, r *http.Request, user database.User) {
@@ -62,14 +62,13 @@ func (s *server) HandlerGetUser(ctx context.Context, req *api.GetUserRequest) (*
 func (s *server) HandlerGetPostsForUser(req *api.GetPostsForUserRequest, stream api.ApiService_HandlerGetPostsForUserServer) error {
 	// Limit parsing
 	limit, err := strconv.Atoi(req.Limit)
-	if err != nil {
-		return status.Errorf(codes.InvalidArgument, "Limit must be an integer: %v", err)
+	if err != nil || limit < 1 || limit > 100 {
+		return status.Error(codes.InvalidArgument, "limit must be between 1 and 100")
 	}
 
-	// UUID parsing
-	userID, err := uuid.Parse(req.UserId)
+	userID, err := ownUserID(stream.Context(), req.UserId)
 	if err != nil {
-		return status.Errorf(codes.InvalidArgument, "Invalid user ID: %v", err)
+		return err
 	}
 
 	// Use stream context

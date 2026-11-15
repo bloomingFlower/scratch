@@ -6,10 +6,8 @@
 #
 # The builder runs on the native build platform and cross-compiles to the target
 # arch (pure Go, CGO disabled), avoiding a QEMU-emulated build.
-# Pinned to the toolchain this vendored tree was built with: the vendored
-# protobuf v1.33.0 does not compile under Go 1.24 (its build-tagged unsafe
-# implementation files don't match, giving "undefined: value/nilType" errors).
-FROM --platform=$BUILDPLATFORM golang:1.21.3 AS builder
+# Use a patched toolchain and the module versions pinned in go.mod/go.sum.
+FROM --platform=$BUILDPLATFORM golang:1.26.11 AS builder
 
 LABEL maintainer="JYY <yourrubber@duck.com>"
 
@@ -17,11 +15,7 @@ WORKDIR /app
 
 ARG TARGETOS TARGETARCH
 
-# Build in module mode (-mod=mod), NOT against the committed vendor/ tree.
-# That tree is missing protobuf's build-tagged unsafe implementation
-# (only value_pure.go is vendored), so `go build -mod=vendor` fails with
-# "undefined: value/nilType" — i.e. the vendored path no longer builds at all,
-# regardless of this change. go.sum still pins every dependency.
+# Build in module mode: the historical committed vendor tree is incomplete.
 COPY go.mod go.sum ./
 RUN go mod download
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	api "github.com/bloomingFlower/rssagg/protos"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -34,8 +33,6 @@ func GetAPIKey(headers http.Header) (string, error) {
 // the context of a gRPC request
 func GetAPIKeyFromContext(ctx context.Context) (string, error) {
 	val := ctx.Value("apiKey")
-	log.Printf("Get API key: %v", ctx)
-
 	if val == nil {
 		return "", errors.New("no API key found in context")
 	}
@@ -47,6 +44,13 @@ func GetAPIKeyFromContext(ctx context.Context) (string, error) {
 	return apiKey, nil
 }
 
+type userContextKey struct{}
+
 func ContextWithUser(ctx context.Context, user *api.User) context.Context {
-	return context.WithValue(ctx, "user", user)
+	return context.WithValue(ctx, userContextKey{}, user)
+}
+
+func UserFromContext(ctx context.Context) (*api.User, bool) {
+	user, ok := ctx.Value(userContextKey{}).(*api.User)
+	return user, ok && user != nil
 }

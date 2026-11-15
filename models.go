@@ -55,7 +55,6 @@ func databaseUserToUser(dbUser database.User) *api.User {
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
 		Name:      dbUser.Name,
-		ApiKey:    dbUser.ApiKey,
 	}
 }
 
